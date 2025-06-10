@@ -53,7 +53,7 @@ resource "incident_escalation_path" "releng_escalation_path" {
                 param_bindings = []
               }]
               then_path = local.common_escalation_levels_path
-              else_path = [{ id = "bh_end_other_severity", type = "end" }]
+              else_path = [] # Changed from [{ id = "bh_end_other_severity", type = "end" }]
             }
           }
         ]
@@ -69,7 +69,7 @@ resource "incident_escalation_path" "releng_escalation_path" {
                 param_bindings = []
               }]
               then_path = local.common_escalation_levels_path
-              else_path = [{ id = "ooh_end_non_critical", type = "end" }]
+              else_path = [] # Changed from [{ id = "ooh_end_non_critical", type = "end" }]
             }
           }
         ]
