@@ -62,7 +62,9 @@ resource "incident_escalation_path" "releng_escalation_path" {
             type = "if_else"
             if_else = {
               conditions = [{
-                subject        = "incident.severity"
+                # Check if the incident's severity is "error" (which means Critical).
+                # Using custom_fields.severity_name as the subject.
+                subject        = "incident.custom_fields.severity_name"
                 operation      = "is"
                 value          = local.ooh_severity
                 param_bindings = []
@@ -82,7 +84,9 @@ resource "incident_escalation_path" "releng_escalation_path" {
             type = "if_else"
             if_else = {
               conditions = [{
-                subject        = "incident.severity"
+                # Check if the incident's severity is "error" (Critical), "info" (Minor), or "warning" (Major).
+                # Using custom_fields.severity_name as the subject.
+                subject        = "incident.custom_fields.severity_name"
                 operation      = "one_of"
                 value          = local.bh_severities
                 param_bindings = []
