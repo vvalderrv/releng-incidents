@@ -1,164 +1,92 @@
+locals {
+  releng_start_time = "09:00"
+  releng_end_time   = "17:00"
+  weekdays          = ["monday", "tuesday", "wednesday", "thursday", "friday"]
+
+  escalation_targets = {
+    oncall  = "user:REPLACE_WITH_ONCALL_USER_ID"
+    lead    = "user:REPLACE_WITH_LEAD_USER_ID"
+    manager = "user:REPLACE_WITH_MANAGER_USER_ID"
+  }
+
+  common_escalation_levels_path = [
+    for name, uid in local.escalation_targets : {
+      id   = "escalate_${name}"
+      type = "level"
+      level = {
+        targets = [{
+          id      = uid
+          type    = "user"
+          urgency = "high"
+        }]
+        time_to_ack_seconds = 1200
+      }
+    }
+  ]
+
+  bh_severities = ["error", "info", "warning"]
+  ooh_severity  = "error"
+}
+
 resource "incident_escalation_path" "releng_escalation_path" {
   name = "Release Engineering Escalation Path"
-
-  working_hours = [{ // Changed to an argument (list of objects)
-    id       = "releng_business_hours"
-    name     = "Release Engineering Business Hours"
-    timezone = "America/Los_Angeles"
-    weekday_intervals = [
-      {
-        weekday    = "monday"
-        start_time = "09:00"
-        end_time   = "17:00"
-      },
-      {
-        weekday    = "tuesday"
-        start_time = "09:00"
-        end_time   = "17:00"
-      },
-      {
-        weekday    = "wednesday"
-        start_time = "09:00"
-        end_time   = "17:00"
-      },
-      {
-        weekday    = "thursday"
-        start_time = "09:00"
-        end_time   = "17:00"
-      },
-      {
-        weekday    = "friday"
-        start_time = "09:00"
-        end_time   = "17:00"
-      }
-    ]
-  }]
 
   path = [
     {
       id   = "if_business_hours"
       type = "if_else"
       if_else = {
-        conditions = [
+        conditions = [{
+          subject        = "escalation.working_hours[\"releng_business_hours\"]"
+          operation      = "is_active"
+          param_bindings = []
+        }]
+        then_path = [
           {
-            operation      = "is_active"
-            subject        = "escalation.working_hours[\"releng_business_hours\"]" // Corrected subject based on doc
-            param_bindings = []
-          }
-        ]
-
-        then_path = [ // During Business Hours
-          {
-            id   = "bh_if_any_severity"
+            id   = "bh_severity_check"
             type = "if_else"
             if_else = {
-              conditions = [
-                {
-                  operation = "one_of"
-                  subject   = "incident.severity" // Still illustrative: verify exact subject for severity
-                  param_bindings = [
-                    { array_value = [{ literal = "error" }, { literal = "warning" }, { literal = "info" }] }
-                  ]
-                }
-              ]
-              then_path = [ // BH & (Critical OR Major OR Minor) -> Escalate
-                {
-                  id   = "bh_escalate_oncall"
-                  type = "level"
-                  level = {
-                    targets = [{
-                      type    = "schedule"
-                      id      = incident_schedule.releng_schedule.id
-                      urgency = "high" // Added urgency
-                    }]
-                    time_to_ack_seconds = 1200
-                  }
-                },
-                {
-                  id   = "bh_escalate_lead"
-                  type = "level"
-                  level = {
-                    targets = [{
-                      type    = "user"
-                      id      = "user:REPLACE_WITH_LEAD_USER_ID"
-                      urgency = "high" // Added urgency
-                    }]
-                    time_to_ack_seconds = 1200
-                  }
-                },
-                {
-                  id   = "bh_escalate_manager"
-                  type = "level"
-                  level = {
-                    targets = [{
-                      type    = "user"
-                      id      = "user:REPLACE_WITH_MANAGER_USER_ID"
-                      urgency = "high" // Added urgency
-                    }]
-                    time_to_ack_seconds = 1200
-                  }
-                }
-              ]
-              else_path = [{ id = "bh_end_other_severity", type = "end" }] // BH & other severity -> End
+              conditions = [{
+                subject        = "incident.severity"
+                operation      = "one_of"
+                value          = local.bh_severities
+                param_bindings = []
+              }]
+              then_path = local.common_escalation_levels_path
+              else_path = [{ id = "bh_end_other_severity", type = "end" }]
             }
           }
         ]
-
-        else_path = [ // After Business Hours
+        else_path = [
           {
-            id   = "ooh_if_critical_severity"
+            id   = "ooh_critical_check"
             type = "if_else"
             if_else = {
-              conditions = [
-                {
-                  operation      = "is"
-                  subject        = "incident.severity" // Still illustrative: verify exact subject for severity
-                  param_bindings = [{ literal = "error" }]
-                }
-              ]
-              then_path = [ // OOH & Critical -> Escalate
-                {
-                  id   = "ooh_escalate_oncall"
-                  type = "level"
-                  level = {
-                    targets = [{
-                      type    = "schedule"
-                      id      = incident_schedule.releng_schedule.id
-                      urgency = "high" // Added urgency
-                    }]
-                    time_to_ack_seconds = 1200
-                  }
-                },
-                {
-                  id   = "ooh_escalate_lead"
-                  type = "level"
-                  level = {
-                    targets = [{
-                      type    = "user"
-                      id      = "user:REPLACE_WITH_LEAD_USER_ID"
-                      urgency = "high" // Added urgency
-                    }]
-                    time_to_ack_seconds = 1200
-                  }
-                },
-                {
-                  id   = "ooh_escalate_manager"
-                  type = "level"
-                  level = {
-                    targets = [{
-                      type    = "user"
-                      id      = "user:REPLACE_WITH_MANAGER_USER_ID"
-                      urgency = "high" // Added urgency
-                    }]
-                    time_to_ack_seconds = 1200
-                  }
-                }
-              ]
-              else_path = [{ id = "ooh_end_non_critical", type = "end" }] // OOH & not Critical -> End
+              conditions = [{
+                subject        = "incident.severity"
+                operation      = "is"
+                value          = local.ooh_severity
+                param_bindings = []
+              }]
+              then_path = local.common_escalation_levels_path
+              else_path = [{ id = "ooh_end_non_critical", type = "end" }]
             }
           }
         ]
       }
     }
   ]
+
+  working_hours = [{
+    id       = "releng_business_hours"
+    name     = "Release Engineering Business Hours"
+    timezone = "America/Los_Angeles"
+    weekday_intervals = [
+      for day in local.weekdays : {
+        weekday    = day
+        start_time = local.releng_start_time
+        end_time   = local.releng_end_time
+      }
+    ]
+  }]
 }
