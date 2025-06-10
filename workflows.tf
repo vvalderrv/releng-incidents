@@ -4,8 +4,9 @@ resource "incident_workflow" "releng_default_workflow" {
   name = "Release Engineering Default Workflow"
 
   # Required arguments for the workflow's basic behavior.
-  state                     = "active"
-  include_private_incidents = true
+  state = "active"
+  # This workflow will now only apply to public incidents, as private incident scope is unavailable.
+  include_private_incidents = false # Changed from true to resolve permissions error
   runs_on_incidents         = "newly_created"
   trigger                   = "incident.created"
   continue_on_step_error    = false
