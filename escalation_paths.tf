@@ -1,118 +1,205 @@
-locals {
-  releng_start_time = "09:00"
-  releng_end_time   = "17:00"
-  weekdays          = ["monday", "tuesday", "wednesday", "thursday", "friday"]
+resource "incident_escalation_path" "test" {
+  name = "test"
 
-  escalation_targets = {
-    oncall  = "user:REPLACE_WITH_ONCALL_USER_ID"
-    lead    = "user:REPLACE_WITH_LEAD_USER_ID"
-    manager = "user:REPLACE_WITH_MANAGER_USER_ID"
-  }
-
-  common_escalation_levels_path = [
-    for name, uid in local.escalation_targets : {
-      id   = "escalate_${name}"
-      type = "level"
-      level = {
-        targets = [{
-          id      = uid
-          type    = "user"
-          urgency = "high"
-        }]
-        time_to_ack_seconds = 1200
-      }
-    }
-  ]
-
-  bh_severities = ["error", "info", "warning"]
-  ooh_severity  = "error"
-}
-
-# This defines an escalation path for Release Engineering incidents.
-# It sets up how alerts will escalate through different people based on
-# whether it's during business hours or not, and the incident's severity.
-resource "incident_escalation_path" "releng_escalation_path" {
-  name = "Release Engineering Escalation Path"
-
-  # Assign this escalation path to specific Incident.io Teams.
-  # An empty list means it's not restricted to specific teams,
-  # allowing it to be used more broadly or assigned manually later.
-  team_ids = []
-
-  # This is the sequence of steps the escalation will follow.
+  # The path defines how escalations are handled.
+  # Each node in the path either sends notifications or moves to another node
   path = [
-    # This is the main decision point: are we currently in business hours?
     {
-      id   = "if_business_hours"
+      id   = "01JYEV5R7WDVBN1ANXXD11AV3H"
       type = "if_else"
+
+      # If then conditions to determine path
       if_else = {
         conditions = [
-          # Check if our defined business hours are active right now.
           {
-            subject        = "escalation.working_hours[\"releng_business_hours\"]"
             operation      = "is_active"
+            subject        = "escalation.working_hours[\"default\"]"
             param_bindings = []
           },
         ]
-        # If it's NOT business hours, follow this path.
-        else_path = [
-          # Outside business hours, we only escalate for critical incidents.
+
+        # If the conditions are met:
+        then_path = [
           {
-            id   = "ooh_critical_check"
-            type = "if_else"
-            if_else = {
-              conditions = [{
-                # Check if the incident's severity is "error" (which means Critical).
-                # Using custom_fields.severity_name as the subject.
-                subject        = "incident.custom_fields.severity_name"
-                operation      = "is"
-                value          = local.ooh_severity
-                param_bindings = []
-              }]
-              # If it's NOT a critical incident outside business hours, stop the escalation.
-              else_path = []
-              # If it IS a critical incident outside business hours, follow the common escalation path.
-              then_path = local.common_escalation_levels_path
+            id   = "01JYEVJM046AM6C2GS40D2QJZ6"
+            type = "level"
+
+            level = {
+              targets = [
+                {
+                  type          = "schedule"
+                  id            = "01JPQQPGAG0DFKMZ9GX15C1RP5"
+                  urgency       = "high"
+                  schedule_mode = "currently_on_call"
+                },
+              ]
+
+              # Give target(s) this long to ack before proceeding
+              time_to_ack_seconds = 900
+            }
+          },
+          {
+            id   = "01JYEVMY4ZC13CQDEMV4VSN3Y0"
+            type = "level"
+
+            level = {
+              targets = [
+                {
+                  type    = "user"
+                  id      = "01JBHW9REJGXA038VC6W3J2KE6"
+                  urgency = "high"
+                },
+              ]
+
+              # Give target(s) this long to ack before proceeding
+              time_to_ack_seconds = 900
+            }
+          },
+          {
+            id   = "01JYEVNDNFWEJFE69CGNVX84BT"
+            type = "level"
+
+            level = {
+              targets = [
+                {
+                  type    = "user"
+                  id      = "01JBHW9WAGRNWP00D31BP7CF1Q"
+                  urgency = "high"
+                },
+              ]
+
+              # Give target(s) this long to ack before proceeding
+              time_to_ack_seconds = 900
             }
           },
         ]
-        # If it IS business hours, follow this path.
-        then_path = [
-          # During business hours, we escalate for Critical, Major, and Minor severities.
+
+        # If the conditions are *not* met:
+        else_path = [
           {
-            id   = "bh_severity_check"
+            id   = "01JYEV68TZQWV1PE3N1X242P0J"
             type = "if_else"
+
+            # If the conditions are met:
             if_else = {
-              conditions = [{
-                # Check if the incident's severity is "error" (Critical), "info" (Minor), or "warning" (Major).
-                # Using custom_fields.severity_name as the subject.
-                subject        = "incident.custom_fields.severity_name"
-                operation      = "one_of"
-                value          = local.bh_severities
-                param_bindings = []
-              }]
-              # If the severity is not one of those during business hours, stop.
+              conditions = [
+                {
+                  operation = "one_of"
+                  subject   = "escalation.priority"
+                  param_bindings = [
+                    {
+                      array_value = [
+                        {
+                          literal = "01JBHW8WRRZDH0EXVVTYQRGWNH"
+                        },
+                      ]
+                    },
+                  ]
+                },
+              ]
+
+              # If the conditions are met:
+              then_path = [
+                {
+                  id   = "01JYEV5R7WHVKK64R4NBFZQ57J"
+                  type = "level"
+
+                  level = {
+                    targets = [
+                      {
+                        type          = "schedule"
+                        id            = "01JPQQPGAG0DFKMZ9GX15C1RP5"
+                        urgency       = "high"
+                        schedule_mode = "currently_on_call"
+                      },
+                    ]
+
+                    # Give target(s) this long to ack before proceeding
+                    time_to_ack_seconds = 900
+                  }
+                },
+                {
+                  id   = "01JYEVQGDVM0KV0RFF5ERKSFBY"
+                  type = "level"
+
+                  level = {
+                    targets = [
+                      {
+                        type    = "user"
+                        id      = "01JBHW9REJGXA038VC6W3J2KE6"
+                        urgency = "high"
+                      },
+                    ]
+
+                    # Give target(s) this long to ack before proceeding
+                    time_to_ack_seconds = 900
+                  }
+                },
+                {
+                  id   = "01JYEVQXKWR3637FDK52F1EJBW"
+                  type = "level"
+
+                  level = {
+                    targets = [
+                      {
+                        type    = "user"
+                        id      = "01JBHW9WAGRNWP00D31BP7CF1Q"
+                        urgency = "high"
+                      },
+                    ]
+
+                    # Give target(s) this long to ack before proceeding
+                    time_to_ack_seconds = 900
+                  }
+                },
+              ]
+
+              # If the conditions are *not* met:
               else_path = []
-              # If it IS one of those severities during business hours, follow the common escalation path.
-              then_path = local.common_escalation_levels_path
             }
           },
         ]
       }
-    }
+    },
   ]
 
-  # This block defines what our "business hours" are for the escalation logic.
-  working_hours = [{
-    id       = "releng_business_hours"
-    name     = "Release Engineering Business Hours"
-    timezone = "America/Los_Angeles"
-    weekday_intervals = [
-      for day in local.weekdays : {
-        weekday    = day
-        start_time = local.releng_start_time
-        end_time   = local.releng_end_time
-      }
-    ]
-  }]
+  # Working hours can be used within the path to route escalations
+  # differently based on the time of day.
+  working_hours = [
+    {
+      id       = "default"
+      name     = "Working Hours"
+      timezone = "America/Los_Angeles"
+      weekday_intervals = [
+        {
+          end_time   = "17:00"
+          start_time = "09:00"
+          weekday    = "monday"
+        },
+        {
+          end_time   = "17:00"
+          start_time = "09:00"
+          weekday    = "tuesday"
+        },
+        {
+          end_time   = "17:00"
+          start_time = "09:00"
+          weekday    = "wednesday"
+        },
+        {
+          end_time   = "17:00"
+          start_time = "09:00"
+          weekday    = "thursday"
+        },
+        {
+          end_time   = "17:00"
+          start_time = "09:00"
+          weekday    = "friday"
+        },
+      ]
+    },
+  ]
+
+  # Assign team IDs to an escalation path so that alerts get routed
+  team_ids = ["01JKBKXQDK07ENQAAPDJ55Q92B"]
 }
