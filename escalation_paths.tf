@@ -46,7 +46,7 @@ resource "incident_escalation_path" "test" {
               targets = [
                 {
                   type    = "user"
-                  id      = "01JBHW9REJGXA038VC6W3J2KE6"
+                  id      = var.incident_lead_user_id
                   urgency = "high"
                 },
               ]
@@ -63,7 +63,7 @@ resource "incident_escalation_path" "test" {
               targets = [
                 {
                   type    = "user"
-                  id      = "01JBHW9WAGRNWP00D31BP7CF1Q"
+                  id      = var.incident_manager_user_id
                   urgency = "high"
                 },
               ]
@@ -126,7 +126,7 @@ resource "incident_escalation_path" "test" {
                     targets = [
                       {
                         type    = "user"
-                        id      = "01JBHW9REJGXA038VC6W3J2KE6"
+                        id      = var.incident_lead_user_id
                         urgency = "high"
                       },
                     ]
@@ -143,7 +143,7 @@ resource "incident_escalation_path" "test" {
                     targets = [
                       {
                         type    = "user"
-                        id      = "01JBHW9WAGRNWP00D31BP7CF1Q"
+                        id      = var.incident_manager_user_id
                         urgency = "high"
                       },
                     ]
@@ -163,8 +163,7 @@ resource "incident_escalation_path" "test" {
     },
   ]
 
-  # Working hours can be used within the path to route escalations
-  # differently based on the time of day.
+  # Working hours
   working_hours = [
     {
       id       = "default"
@@ -201,5 +200,5 @@ resource "incident_escalation_path" "test" {
   ]
 
   # Assign team IDs to an escalation path so that alerts get routed
-  team_ids = ["01JKBKXQDK07ENQAAPDJ55Q92B"]
+  team_ids = [var.incident_releng_team_id]
 }
