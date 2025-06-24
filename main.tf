@@ -8,6 +8,4 @@ terraform {
   required_version = ">= 0.13"
 }
 
-provider "incident" {
-  api_key = var.incident_api_key
-}
+provider "incident" {}
