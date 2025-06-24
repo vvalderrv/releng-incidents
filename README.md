@@ -3,7 +3,7 @@
 Manages specific Incident.io configurations for the Release Engineering
 team using Terraform.
 
-This repository currently defines and manages resources such as:
+This repository currently defines and manages resources such as
 - Alert Sources (`alert_sources.tf`)
 - On-call Schedules (`schedules.tf`)
   - *Note: Uses placeholder user IDs pending SCIM access.*
