@@ -1,12 +1,5 @@
 # GitHub secret variables
 
-# To Do: Create a key for Releng service account
-variable "incident_api_key" {
-  description = "The Release Engineering API key for Incident.io."
-  type        = string
-  sensitive   = true
-}
-
 variable "incident_lead_user_id" {
   description = "The Google Workspace ID for the Release Engineering Lead."
   type        = string
