@@ -1,14 +1,11 @@
 resource "incident_escalation_path" "test" {
   name = "test"
 
-  # The path defines how escalations are handled.
-  # Each node in the path either sends notifications or moves to another node
   path = [
     {
       id   = "01JYEV5R7WDVBN1ANXXD11AV3H"
       type = "if_else"
 
-      # If then conditions to determine path
       if_else = {
         conditions = [
           {
@@ -18,7 +15,6 @@ resource "incident_escalation_path" "test" {
           },
         ]
 
-        # If the conditions are met:
         then_path = [
           {
             id   = "01JYEVJM046AM6C2GS40D2QJZ6"
@@ -33,8 +29,6 @@ resource "incident_escalation_path" "test" {
                   schedule_mode = "currently_on_call"
                 },
               ]
-
-              # Give target(s) this long to ack before proceeding
               time_to_ack_seconds = 900
             }
           },
@@ -50,8 +44,6 @@ resource "incident_escalation_path" "test" {
                   urgency = "high"
                 },
               ]
-
-              # Give target(s) this long to ack before proceeding
               time_to_ack_seconds = 900
             }
           },
@@ -67,34 +59,33 @@ resource "incident_escalation_path" "test" {
                   urgency = "high"
                 },
               ]
-
-              # Give target(s) this long to ack before proceeding
               time_to_ack_seconds = 900
             }
           },
         ]
 
-        # If the conditions are *not* met:
         else_path = [
           {
             id   = "01JYEV68TZQWV1PE3N1X242P0J"
             type = "if_else"
 
-            # If the conditions are met:
             if_else = {
               conditions = [
                 {
-                  subject   = "incident.severity"
-                  operation = "is"
+                  subject   = "escalation.priority"
+                  operation = "one_of"
                   param_bindings = [
                     {
-                      literal = "01JBHW8WRRZSCBB2VX1W2TB36W" # Critical severity ID
+                      array_value = [
+                        {
+                          literal = "01JBHW8WRRZSCBB2VX1W2TB36W" # Critical priority ID
+                        },
+                      ]
                     },
                   ]
                 },
               ]
 
-              # If the conditions are met:
               then_path = [
                 {
                   id   = "01JYEV5R7WHVKK64R4NBFZQ57J"
@@ -109,8 +100,6 @@ resource "incident_escalation_path" "test" {
                         schedule_mode = "currently_on_call"
                       },
                     ]
-
-                    # Give target(s) this long to ack before proceeding
                     time_to_ack_seconds = 900
                   }
                 },
@@ -126,8 +115,6 @@ resource "incident_escalation_path" "test" {
                         urgency = "high"
                       },
                     ]
-
-                    # Give target(s) this long to ack before proceeding
                     time_to_ack_seconds = 900
                   }
                 },
@@ -143,14 +130,11 @@ resource "incident_escalation_path" "test" {
                         urgency = "high"
                       },
                     ]
-
-                    # Give target(s) this long to ack before proceeding
                     time_to_ack_seconds = 900
                   }
                 },
               ]
 
-              # If the conditions are *not* met:
               else_path = []
             }
           },
@@ -159,7 +143,6 @@ resource "incident_escalation_path" "test" {
     },
   ]
 
-  # Working hours
   working_hours = [
     {
       id       = "default"
@@ -167,34 +150,33 @@ resource "incident_escalation_path" "test" {
       timezone = "America/Los_Angeles"
       weekday_intervals = [
         {
-          end_time   = "17:00"
           start_time = "09:00"
+          end_time   = "17:00"
           weekday    = "monday"
         },
         {
-          end_time   = "17:00"
           start_time = "09:00"
+          end_time   = "17:00"
           weekday    = "tuesday"
         },
         {
-          end_time   = "17:00"
           start_time = "09:00"
+          end_time   = "17:00"
           weekday    = "wednesday"
         },
         {
-          end_time   = "17:00"
           start_time = "09:00"
+          end_time   = "17:00"
           weekday    = "thursday"
         },
         {
-          end_time   = "17:00"
           start_time = "09:00"
+          end_time   = "17:00"
           weekday    = "friday"
         },
       ]
     },
   ]
 
-  # Assign team IDs to an escalation path so that alerts get routed
   team_ids = ["01JKBKXQDK07ENQAAPDJ55Q92B"]
 }
