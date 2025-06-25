@@ -1,7 +1,5 @@
-# Workflow to run Terraform plan and validate changes
 name: 'Terraform Plan'
 
-# Triggers on pushes and pull requests
 on:
   push:
     branches:
@@ -13,31 +11,26 @@ on:
       - feature/**
 
 jobs:
-  # Define the Terraform job
-  terraform:
+  terraform_plan:
     name: 'Terraform Plan'
     runs-on: ubuntu-latest
+
     steps:
-      # Checkout the repository code
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Set up Terraform using a compatible version for Incident.io
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.6.0
 
-      # Check Terraform code formatting
       - name: Terraform Format Check
         run: terraform fmt --check
 
-      # Initialize Terraform working directory
       - name: Terraform Init
         id: init
         run: terraform init
 
-      # Generate and show Terraform plan
       - name: Terraform Plan
         id: plan
         run: terraform plan
