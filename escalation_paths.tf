@@ -1,8 +1,7 @@
 # Create escalation path
 resource "incident_escalation_path" "releng" {
-  name = "Release Engineering"
+  name = "Release Engineering (TF Managed)"
 
-  # Working hours definition
   working_hours = [
     {
       id       = "default"
@@ -18,7 +17,6 @@ resource "incident_escalation_path" "releng" {
     },
   ]
 
-  # Main escalation path logic
   path = [
     {
       id   = "check_working_hours"
