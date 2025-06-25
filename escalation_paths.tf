@@ -84,17 +84,10 @@ resource "incident_escalation_path" "test" {
             if_else = {
               conditions = [
                 {
-                  operation = "one_of"
-                  subject   = "escalation.priority"
-                  param_bindings = [
-                    {
-                      array_value = [
-                        {
-                          literal = "01JBHW8WRRZDH0EXVVTYQRGWNH"
-                        },
-                      ]
-                    },
-                  ]
+                  subject        = "incident.severity"
+                  operation      = "is"
+                  value          = "critical"
+                  param_bindings = []
                 },
               ]
 
