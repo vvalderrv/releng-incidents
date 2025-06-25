@@ -84,10 +84,13 @@ resource "incident_escalation_path" "test" {
             if_else = {
               conditions = [
                 {
-                  subject        = "incident.severity"
-                  operation      = "is"
-                  value          = "critical"
-                  param_bindings = []
+                  subject   = "incident.severity"
+                  operation = "is"
+                  param_bindings = [
+                    {
+                      literal = "01JBHW8WRRZSCBB2VX1W2TB36W" # Critical severity ID
+                    },
+                  ]
                 },
               ]
 
@@ -193,5 +196,5 @@ resource "incident_escalation_path" "test" {
   ]
 
   # Assign team IDs to an escalation path so that alerts get routed
-  team_ids = [var.incident_releng_team_id]
+  team_ids = ["01JKBKXQDK07ENQAAPDJ55Q92B"]
 }
