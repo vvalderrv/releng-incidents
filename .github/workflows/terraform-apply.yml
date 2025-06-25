@@ -25,6 +25,9 @@ jobs:
       - name: Import alert source if it exists
         env:
           INCIDENT_API_KEY: ${{ secrets.INCIDENT_API_KEY }}
+          TF_VAR_incident_lead_user_id: ${{ secrets.INCIDENT_LEAD_USER_ID }}
+          TF_VAR_incident_manager_user_id: ${{ secrets.INCIDENT_MANAGER_USER_ID }}
+          TF_VAR_incident_releng_team_id: ${{ secrets.INCIDENT_RELENG_TEAM_ID }}
         run: |
           ALERT_ID=$(curl -s -H "Authorization: Bearer $INCIDENT_API_KEY" https://api.incident.io/v2/alert_sources | jq -r '.alert_sources[] | select(.name=="LF Releng Alerts") | .id')
           if [ -n "$ALERT_ID" ]; then
@@ -37,6 +40,9 @@ jobs:
       - name: Import escalation path if it exists
         env:
           INCIDENT_API_KEY: ${{ secrets.INCIDENT_API_KEY }}
+          TF_VAR_incident_lead_user_id: ${{ secrets.INCIDENT_LEAD_USER_ID }}
+          TF_VAR_incident_manager_user_id: ${{ secrets.INCIDENT_MANAGER_USER_ID }}
+          TF_VAR_incident_releng_team_id: ${{ secrets.INCIDENT_RELENG_TEAM_ID }}
         run: |
           ESCALATION_ID=$(curl -s -H "Authorization: Bearer $INCIDENT_API_KEY" https://api.incident.io/v2/escalation_paths | jq -r '.escalation_paths[] | select(.name=="test") | .id')
           if [ -n "$ESCALATION_ID" ]; then
@@ -49,6 +55,9 @@ jobs:
       - name: Import workflow if it exists
         env:
           INCIDENT_API_KEY: ${{ secrets.INCIDENT_API_KEY }}
+          TF_VAR_incident_lead_user_id: ${{ secrets.INCIDENT_LEAD_USER_ID }}
+          TF_VAR_incident_manager_user_id: ${{ secrets.INCIDENT_MANAGER_USER_ID }}
+          TF_VAR_incident_releng_team_id: ${{ secrets.INCIDENT_RELENG_TEAM_ID }}
         run: |
           WORKFLOW_ID=$(curl -s -H "Authorization: Bearer $INCIDENT_API_KEY" https://api.incident.io/v2/workflows | jq -r '.workflows[] | select(.name=="When an incident is created or changed: Send message to a channel") | .id')
           if [ -n "$WORKFLOW_ID" ]; then
@@ -65,4 +74,3 @@ jobs:
           TF_VAR_incident_lead_user_id: ${{ secrets.INCIDENT_LEAD_USER_ID }}
           TF_VAR_incident_manager_user_id: ${{ secrets.INCIDENT_MANAGER_USER_ID }}
           TF_VAR_incident_releng_team_id: ${{ secrets.INCIDENT_RELENG_TEAM_ID }}
-
