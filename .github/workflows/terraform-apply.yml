@@ -1,39 +1,68 @@
-# Workflow to apply changes to production
 name: 'Terraform Apply'
 
-# Requires manual trigger
 on:
   workflow_dispatch:
 
 jobs:
-  # Define the Terraform Apply job
   terraform_apply:
     name: 'Terraform Apply'
     runs-on: ubuntu-latest
     environment: production
 
     steps:
-      # Checkout the repository code
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Set up Terraform using a compatible version for Incident.io             
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.6.0
 
-      # Initialize Terraform working directory
       - name: Terraform Init
         id: init
         run: terraform init
 
-      # Apply Terraform changes with manual approval
+      - name: Import alert source if it exists
+        env:
+          INCIDENT_API_KEY: ${{ secrets.INCIDENT_API_KEY }}
+        run: |
+          ALERT_ID=$(curl -s -H "Authorization: Bearer $INCIDENT_API_KEY" https://api.incident.io/v2/alert_sources | jq -r '.alert_sources[] | select(.name=="LF Releng Alerts") | .id')
+          if [ -n "$ALERT_ID" ]; then
+            echo "Alert source exists with ID: $ALERT_ID. Importing..."
+            terraform import 'incident_alert_source.releng' $ALERT_ID || true
+          else
+            echo "No existing alert source found. Proceeding to create."
+          fi
+
+      - name: Import escalation path if it exists
+        env:
+          INCIDENT_API_KEY: ${{ secrets.INCIDENT_API_KEY }}
+        run: |
+          ESCALATION_ID=$(curl -s -H "Authorization: Bearer $INCIDENT_API_KEY" https://api.incident.io/v2/escalation_paths | jq -r '.escalation_paths[] | select(.name=="test") | .id')
+          if [ -n "$ESCALATION_ID" ]; then
+            echo "Escalation path exists with ID: $ESCALATION_ID. Importing..."
+            terraform import 'incident_escalation_path.test' $ESCALATION_ID || true
+          else
+            echo "No existing escalation path found. Proceeding to create."
+          fi
+
+      - name: Import workflow if it exists
+        env:
+          INCIDENT_API_KEY: ${{ secrets.INCIDENT_API_KEY }}
+        run: |
+          WORKFLOW_ID=$(curl -s -H "Authorization: Bearer $INCIDENT_API_KEY" https://api.incident.io/v2/workflows | jq -r '.workflows[] | select(.name=="When an incident is created or changed: Send message to a channel") | .id')
+          if [ -n "$WORKFLOW_ID" ]; then
+            echo "Workflow exists with ID: $WORKFLOW_ID. Importing..."
+            terraform import 'incident_workflow.when_an_incident_is_created_or_changed_send_message_to_a_channel' $WORKFLOW_ID || true
+          else
+            echo "No existing workflow found. Proceeding to create."
+          fi
+
       - name: Terraform Apply
-        id: apply
         run: terraform apply -auto-approve
         env:
           INCIDENT_API_KEY: ${{ secrets.INCIDENT_API_KEY }}
           TF_VAR_incident_lead_user_id: ${{ secrets.INCIDENT_LEAD_USER_ID }}
           TF_VAR_incident_manager_user_id: ${{ secrets.INCIDENT_MANAGER_USER_ID }}
           TF_VAR_incident_releng_team_id: ${{ secrets.INCIDENT_RELENG_TEAM_ID }}
+
