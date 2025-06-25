@@ -1,5 +1,5 @@
-resource "incident_workflow" "when_an_incident_is_created_or_changed_send_message_to_a_channel" {
-  name    = "When an incident is created or changed: Send message to a channel"
+resource "incident_workflow" "releng_default_workflow" {
+  name    = "Release Engineering Default Workflow (TF Managed)"
   trigger = "incident.updated"
   expressions = [
   ]
@@ -40,7 +40,6 @@ resource "incident_workflow" "when_an_incident_is_created_or_changed_send_messag
         # "Message"
         {
           value = {
-            # "Alert Source: {{ alert.url }} \n\nRunbook Link: {{ incident.runbook_url }}"
             literal = "{\"content\":[{\"content\":[{\"marks\":[{\"type\":\"code\"}],\"text\":\"Alert Source: {{ alert.url }}\",\"type\":\"text\"},{\"text\":\" \",\"type\":\"text\"}],\"type\":\"paragraph\"},{\"content\":[{\"marks\":[{\"type\":\"code\"}],\"text\":\"Runbook Link: {{ incident.runbook_url }}\",\"type\":\"text\"}],\"type\":\"paragraph\"}],\"type\":\"doc\"}"
           }
         },
