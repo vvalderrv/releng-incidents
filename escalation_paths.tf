@@ -85,7 +85,7 @@ resource "incident_escalation_path" "releng" {
             if_else = {
               conditions = [
                 {
-                  subject   = "incident.priority"
+                  subject   = "escalation.priority"
                   operation = "is"
                   param_bindings = [
                     {
