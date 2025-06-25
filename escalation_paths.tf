@@ -1,41 +1,57 @@
-resource "incident_escalation_path" "test" {
-  name = "test"
+# Create escalation path
+resource "incident_escalation_path" "releng" {
+  name = "Release Engineering"
 
+  # Working hours definition
+  working_hours = [
+    {
+      id       = "default"
+      name     = "Working Hours"
+      timezone = "America/Los_Angeles"
+      weekday_intervals = [
+        { weekday = "monday", start_time = "09:00", end_time = "17:00" },
+        { weekday = "tuesday", start_time = "09:00", end_time = "17:00" },
+        { weekday = "wednesday", start_time = "09:00", end_time = "17:00" },
+        { weekday = "thursday", start_time = "09:00", end_time = "17:00" },
+        { weekday = "friday", start_time = "09:00", end_time = "17:00" },
+      ]
+    },
+  ]
+
+  # Main escalation path logic
   path = [
     {
-      id   = "01JYEV5R7WDVBN1ANXXD11AV3H"
+      id   = "check_working_hours"
       type = "if_else"
 
       if_else = {
         conditions = [
           {
-            operation      = "is_active"
             subject        = "escalation.working_hours[\"default\"]"
+            operation      = "is_active"
             param_bindings = []
           },
         ]
 
         then_path = [
           {
-            id   = "01JYEVJM046AM6C2GS40D2QJZ6"
+            id   = "working_oncall"
             type = "level"
-
             level = {
               targets = [
                 {
                   type          = "schedule"
                   id            = "01JPQQPGAG0DFKMZ9GX15C1RP5"
-                  urgency       = "high"
                   schedule_mode = "currently_on_call"
+                  urgency       = "high"
                 },
               ]
               time_to_ack_seconds = 900
             }
           },
           {
-            id   = "01JYEVMY4ZC13CQDEMV4VSN3Y0"
+            id   = "working_lead"
             type = "level"
-
             level = {
               targets = [
                 {
@@ -48,9 +64,8 @@ resource "incident_escalation_path" "test" {
             }
           },
           {
-            id   = "01JYEVNDNFWEJFE69CGNVX84BT"
+            id   = "working_manager"
             type = "level"
-
             level = {
               targets = [
                 {
@@ -66,21 +81,19 @@ resource "incident_escalation_path" "test" {
 
         else_path = [
           {
-            id   = "01JYEV68TZQWV1PE3N1X242P0J"
+            id   = "check_priority"
             type = "if_else"
 
             if_else = {
               conditions = [
                 {
-                  subject   = "escalation.priority"
-                  operation = "one_of"
+                  subject   = "incident.priority"
+                  operation = "is"
                   param_bindings = [
                     {
-                      array_value = [
-                        {
-                          literal = "01JBHW8WRRZSCBB2VX1W2TB36W" # Critical priority ID
-                        },
-                      ]
+                      value = {
+                        literal = "P1"
+                      }
                     },
                   ]
                 },
@@ -88,25 +101,23 @@ resource "incident_escalation_path" "test" {
 
               then_path = [
                 {
-                  id   = "01JYEV5R7WHVKK64R4NBFZQ57J"
+                  id   = "offhours_oncall"
                   type = "level"
-
                   level = {
                     targets = [
                       {
                         type          = "schedule"
                         id            = "01JPQQPGAG0DFKMZ9GX15C1RP5"
-                        urgency       = "high"
                         schedule_mode = "currently_on_call"
+                        urgency       = "high"
                       },
                     ]
                     time_to_ack_seconds = 900
                   }
                 },
                 {
-                  id   = "01JYEVQGDVM0KV0RFF5ERKSFBY"
+                  id   = "offhours_lead"
                   type = "level"
-
                   level = {
                     targets = [
                       {
@@ -119,9 +130,8 @@ resource "incident_escalation_path" "test" {
                   }
                 },
                 {
-                  id   = "01JYEVQXKWR3637FDK52F1EJBW"
+                  id   = "offhours_manager"
                   type = "level"
-
                   level = {
                     targets = [
                       {
@@ -143,40 +153,5 @@ resource "incident_escalation_path" "test" {
     },
   ]
 
-  working_hours = [
-    {
-      id       = "default"
-      name     = "Working Hours"
-      timezone = "America/Los_Angeles"
-      weekday_intervals = [
-        {
-          start_time = "09:00"
-          end_time   = "17:00"
-          weekday    = "monday"
-        },
-        {
-          start_time = "09:00"
-          end_time   = "17:00"
-          weekday    = "tuesday"
-        },
-        {
-          start_time = "09:00"
-          end_time   = "17:00"
-          weekday    = "wednesday"
-        },
-        {
-          start_time = "09:00"
-          end_time   = "17:00"
-          weekday    = "thursday"
-        },
-        {
-          start_time = "09:00"
-          end_time   = "17:00"
-          weekday    = "friday"
-        },
-      ]
-    },
-  ]
-
-  team_ids = ["01JKBKXQDK07ENQAAPDJ55Q92B"]
+  team_ids = [var.incident_releng_team_id]
 }
