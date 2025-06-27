@@ -1,4 +1,3 @@
-# Create escalation path
 resource "incident_escalation_path" "releng" {
   name = "Release Engineering (TF Managed)"
 
@@ -86,12 +85,14 @@ resource "incident_escalation_path" "releng" {
               conditions = [
                 {
                   subject   = "escalation.priority"
-                  operation = "is"
+                  operation = "one_of"
                   param_bindings = [
                     {
-                      value = {
-                        literal = "P1"
-                      }
+                      array_value = [
+                        {
+                          literal = "01JBHW8WRRZDH0EXVVTYQRGWNH" # Urgent
+                        },
+                      ]
                     },
                   ]
                 },
