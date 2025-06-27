@@ -1,3 +1,4 @@
+# Create escalation path
 resource "incident_escalation_path" "releng" {
   name = "Release Engineering (TF Managed)"
 
@@ -90,7 +91,7 @@ resource "incident_escalation_path" "releng" {
                     {
                       array_value = [
                         {
-                          literal = "01JBHW8WRRZDH0EXVVTYQRGWNH" # Urgent
+                          literal = "P1"
                         },
                       ]
                     },
