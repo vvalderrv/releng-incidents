@@ -1,4 +1,3 @@
-# Create escalation path
 resource "incident_escalation_path" "releng" {
   name = "Release Engineering (TF Managed)"
 
@@ -47,34 +46,34 @@ resource "incident_escalation_path" "releng" {
               time_to_ack_seconds = 900
             }
           },
-          {
-            id   = "working_lead"
-            type = "level"
-            level = {
-              targets = [
-                {
-                  type    = "user"
-                  id      = var.incident_lead_user_id
-                  urgency = "high"
-                },
-              ]
-              time_to_ack_seconds = 900
-            }
-          },
-          {
-            id   = "working_manager"
-            type = "level"
-            level = {
-              targets = [
-                {
-                  type    = "user"
-                  id      = var.incident_manager_user_id
-                  urgency = "high"
-                },
-              ]
-              time_to_ack_seconds = 900
-            }
-          },
+          # {
+          #   id   = "working_lead"
+          #   type = "level"
+          #   level = {
+          #     targets = [
+          #       {
+          #         type    = "user"
+          #         id      = var.incident_lead_user_id
+          #         urgency = "high"
+          #       },
+          #     ]
+          #     time_to_ack_seconds = 900
+          #   }
+          # },
+          # {
+          #   id   = "working_manager"
+          #   type = "level"
+          #   level = {
+          #     targets = [
+          #       {
+          #         type    = "user"
+          #         id      = var.incident_manager_user_id
+          #         urgency = "high"
+          #       },
+          #     ]
+          #     time_to_ack_seconds = 900
+          #   }
+          # },
         ]
 
         else_path = [
@@ -115,34 +114,34 @@ resource "incident_escalation_path" "releng" {
                     time_to_ack_seconds = 900
                   }
                 },
-                {
-                  id   = "offhours_lead"
-                  type = "level"
-                  level = {
-                    targets = [
-                      {
-                        type    = "user"
-                        id      = var.incident_lead_user_id
-                        urgency = "high"
-                      },
-                    ]
-                    time_to_ack_seconds = 900
-                  }
-                },
-                {
-                  id   = "offhours_manager"
-                  type = "level"
-                  level = {
-                    targets = [
-                      {
-                        type    = "user"
-                        id      = var.incident_manager_user_id
-                        urgency = "high"
-                      },
-                    ]
-                    time_to_ack_seconds = 900
-                  }
-                },
+                # {
+                #   id   = "offhours_lead"
+                #   type = "level"
+                #   level = {
+                #     targets = [
+                #       {
+                #         type    = "user"
+                #         id      = var.incident_lead_user_id
+                #         urgency = "high"
+                #       },
+                #     ]
+                #     time_to_ack_seconds = 900
+                #   }
+                # },
+                # {
+                #   id   = "offhours_manager"
+                #   type = "level"
+                #   level = {
+                #     targets = [
+                #       {
+                #         type    = "user"
+                #         id      = var.incident_manager_user_id
+                #         urgency = "high"
+                #       },
+                #     ]
+                #     time_to_ack_seconds = 900
+                #   }
+                # },
               ]
 
               else_path = []
