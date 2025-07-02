@@ -1,5 +1,5 @@
 resource "incident_escalation_path" "releng" {
-  name = "Release Engineering (TF Managed)"
+  name = "Release Engineering"
 
   working_hours = [
     {
