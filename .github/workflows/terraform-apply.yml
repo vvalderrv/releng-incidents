@@ -57,6 +57,19 @@ jobs:
             echo "No existing escalation path found. Proceeding to create."
           fi
 
+      # Clean up orphaned escalation path state if not found
+      - name: Remove escalation path from state if missing
+        env:
+          INCIDENT_API_KEY: ${{ secrets.INCIDENT_API_KEY }}
+        run: |
+          ESCALATION_ID=$(curl -s -H "Authorization: Bearer $INCIDENT_API_KEY" https://api.incident.io/v2/escalation_paths | jq -r '.escalation_paths[] | select(.name=="Release Engineering") | .id')
+          if [ -z "$ESCALATION_ID" ]; then
+            echo "No existing escalation path found upstream. Removing from state..."
+            terraform state rm 'incident_escalation_path.releng' || true
+          else
+            echo "Escalation path exists upstream. No state change needed."
+          fi
+
       # Import workflow if it already exists
       - name: Import workflow if it exists
         env:
